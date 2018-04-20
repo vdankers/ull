@@ -4,9 +4,9 @@ Repository containing assignments for the Unsupervised Language Learning course,
 ### Instructions for Lab 1:
 
 The code for lab 1 can be found in the Lab1 folder. We separated functionality for the three main topics into three files:
-	- ULL_Lab1_WordSimilarity.ipynb
-	- ULL_Lab1_WordAnalogy.ipynb
-	- ULL_Lab1_Clustering.ipybn
+1. ULL_Lab1_WordSimilarity.ipynb
+2. ULL_Lab1_WordAnalogy.ipynb
+3. ULL_Lab1_Clustering.ipybn
 
 You can run the code by first setting the correct local paths to the data in the first code cell, and then run the code cell by cell.
 The requirements are listed in the first cell of every notebook.

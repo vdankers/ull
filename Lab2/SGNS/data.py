@@ -32,27 +32,6 @@ class Dictionary(object):
         self.counts = Counter()
         self.phrase_counts = Counter()
 
-    def select_phrases(self, min_count=5, threshold=100):
-        """Based on the word counts, determine which pairs should act as phrases.
-
-        Args:
-            min count (int): the minimum number of occurrences required
-            threshold (float): determmines when something is a phrase
-
-        Returns:
-            list of tuples containg word pairs that make up phrases
-        """
-        phrases = set()
-        self.total = sum(self.counts.values())
-        for phrase in self.phrase_counts:
-            pa = self.counts[phrase[0]]
-            pb = self.counts[phrase[1]]
-            pab = self.phrase_counts[phrase]
-            prob = (pab - min_count) / (pa * pb)
-            if prob * self.total > threshold:
-                phrases.add(phrase)
-        return phrases
-
     def add_word(self, word):
         """Add one new word to your dicitonary.
 
@@ -80,7 +59,9 @@ class Dictionary(object):
         Every word is represented according to an adapted frequency count."""
         table = []
         self.words = [self.index2word[i] for i in range(len(self.index2word))]
-        adapted_counts = np.array(list([float(self.counts[w]) ** (3/4) for w in self.words]))
+        adapted_counts = np.array(
+            list([float(self.counts[w]) ** (3/4) for w in self.words])
+        )
         # print(adapted_counts)
         normalizer = sum(adapted_counts)
         for i, number in enumerate(adapted_counts):
@@ -90,21 +71,6 @@ class Dictionary(object):
                 table.append(i)
         logging.info("Prepared negative samples.")
         self.table = table
-
-    def prepare_subsampling_table(self):
-        """Create a table from which you can draw the probability a word should be deleted
-        because it occurs too often.
-
-        Returns:
-            dict: table giving a probability per input word
-        """
-        self.subsampling_table = dict()
-        total = sum(self.counts.values())
-        for word in self.word2index:
-            z = self.counts[word] / total
-            self.subsampling_table[word] = (np.sqrt(z / 0.001) + 1) * (0.001 / z)
-        logging.info("Prepared subsampling table.")
-        return self.subsampling_table
 
     def sample(self, pos_index, amount):
         """ Draw the desired amount of negative samples that are not the given index.
@@ -133,12 +99,14 @@ class Dictionary(object):
 class Corpus(object):
     """Collects words and corresponding associations, preprocesses them."""
 
-    def __init__(self, path, window, min_count, batch_size, nr_docs, neg_samples, enable_cuda=False):
+    def __init__(self, path, window, min_count, batch_size, nr_docs,
+                 neg_samples, enable_cuda=False):
         """Initialize pairs of words and associations.
 
         Args:
             path (str): file path to read data from
             window (int): window size for corpus pairs
+            min_count (int): if words occur less often than this, remove them
             batch_size (int): int indicating the desired size for batches
             nr_docs (int): how many sentences should be used from the corpus
             neg_samples (int): number of negative samples selected per positive sample
@@ -158,25 +126,20 @@ class Corpus(object):
                 self.lines.append(line)
                 if len(self.lines) == nr_docs and nr_docs != -1:
                     break
-        # Select the phrases
-        #phrases = self.dictionary.select_phrases()
 
-        # Remove words occurring less than min count times, and replace phrases
-        # self.lines = self.remove_min_count(min_count, self.lines)
-        #self.lines = self.replace_phrases(phrases, self.lines)
+        self.lines = self.remove_min_count(min_count, self.lines)
 
         # Recreate your dictionary with the adapted corpus
         dictionary_norare = Dictionary()
         for i, line in enumerate(self.lines):
             dictionary_norare.add_text(line)
         self.dictionary = dictionary_norare
-        table = self.dictionary.prepare_subsampling_table()
-        # self.lines = self.downsample(table, self.lines)
 
+        # If new words are asked for their index, give UNK
         self.dictionary.to_unk()
         self.vocab_size = len(self.dictionary.word2index)
 
-        # Ask your dictionary to prepare negative samples before creating batches
+        # Ask dictionary to prepare negative samples before creating batches
         self.dictionary.prepare_negative_sampling_table()
 
         # Create batches
@@ -215,6 +178,7 @@ class Corpus(object):
         Args:
             phrases (list): list of tuples of the phrase pairs
             lines: list of sentences from the corpus
+
         Returns:
             list of sentences from the corpus, with phrases replaced
         """
@@ -292,9 +256,13 @@ class Corpus(object):
                 batch_centre[j] = centre
                 batch_neg_samples[j, :] = torch.LongTensor(neg_samples)
             if enable_cuda:
-                batches.append((Variable(batch_neighbour).cuda(), Variable(batch_centre).cuda(), Variable(batch_neg_samples).cuda()))
+                batches.append((Variable(batch_neighbour).cuda(),
+                                Variable(batch_centre).cuda(),
+                                Variable(batch_neg_samples).cuda()))
             else:
-                batches.append((Variable(batch_neighbour), Variable(batch_centre), Variable(batch_neg_samples)))
+                batches.append((Variable(batch_neighbour),
+                                Variable(batch_centre),
+                                Variable(batch_neg_samples)))
         return batches
 
 
@@ -313,6 +281,3 @@ class Corpus(object):
             sequence (list of stringss): text to turn into indices
         """
         return ['<s>'] + sequence.split() + ['</s>']
-
-if __name__ == '__main__':
-    a = Corpus(sys.argv[1], 2, 10)

@@ -11,6 +11,16 @@ import numpy as np
 
 
 def to_dict(sgns, words, both=False):
+    """Map SGNS embedding matrices to dictionaries.
+
+    Args:
+        sgns: SGNS model
+        words: list of words in order of appearances
+        both: whether to add input and output embeddings
+
+    Returns:
+        dictionary mapping words to vectors
+    """
     in_matrix = sgns.in_embeddings.cpu().weight.data.numpy()
     in_dict = { word : in_matrix[i, :] for i, word in enumerate(words) }
     if not both:
@@ -22,10 +32,19 @@ def to_dict(sgns, words, both=False):
 
 
 def test(embeddings, pairs, multiply, gold="../data/lst/lst_test.gold"):
+    """Evaluate SGNS on the LST task and print output to terminal.
 
+    Args:
+        embeddings: dictionary mapping words to arrays
+        pairs: test pairs for the task
+        multiply: boolean indicating whether to add or multiply vectors
+        gold: golden standard
+    """
     outputs = []
     for centre, context, n, term, candidates, missing_candidates in pairs:
-        if centre not in embeddings: 
+        # Prepare context vector
+        # If centre word not in vocabulary, use the general term
+        if centre not in embeddings:
             centre = term.split('.')[0]
         context_vector = np.zeros((len(embeddings["work"],)))
         for word in context:
@@ -36,11 +55,12 @@ def test(embeddings, pairs, multiply, gold="../data/lst/lst_test.gold"):
             else:
                 context_vector += np.array(emb)
 
+        # Compute a score per candidate
         ranking = Counter()
         for candidate in candidates:
             if not centre in embeddings:
                 ranking[candidate] = 0
-            else:    
+            else:   
                 if multiply:
                     centre_context = context_vector * np.array(embeddings[centre])
                     candidate_context = context_vector * np.array(embeddings[candidate])
@@ -49,7 +69,7 @@ def test(embeddings, pairs, multiply, gold="../data/lst/lst_test.gold"):
                     candidate_context = context_vector + np.array(embeddings[candidate])
 
                 ranking[candidate] = 1 - cosine(centre_context, candidate_context)
-        
+       
         # Use format specified in LST README
         output = "RANKED\t{} {}".format(term, n)
         for j, (candidate, score) in enumerate(ranking.most_common()):
@@ -65,9 +85,22 @@ def test(embeddings, pairs, multiply, gold="../data/lst/lst_test.gold"):
 
 def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed",
                  cand_path="../data/lst/lst.gold.candidates"):
+    """Prepare the test set for evaluation for the LST task.
+
+    Args:
+        w2i: dictionary mapping words to indices
+        window: integer marking the context window
+        sentences_path: LST file with word, sentence pairs
+        cand_path: file containing LST substitution candidates
+
+    Returns:
+        a list of tuples
+    """
     test_pairs = []
     candidates = dict()
     missing_candidates = dict()
+
+    # Collect candidates
     with open(cand_path, 'r') as f:
         for line in f:
             term, term_candidates = tuple(line.split("::"))
@@ -87,7 +120,8 @@ def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed"
             post = sentence[pos+1:min(pos + window + 1, len(sentence))]
             context = pre + post
             centre = sentence[pos]
-            test_pairs.append((centre, context, int(number), term, candidates[term], missing_candidates[term]))
+            test_pairs.append((centre, context, int(number), term, 
+                               candidates[term], missing_candidates[term]))
     return test_pairs
 
 
@@ -96,14 +130,20 @@ if __name__ == "__main__":
         description='Skipgram Negative Sampling.')
     p.add_argument('--embed_file', type=str, default='SGNS.pickle',
                    help='Path to pickled embeddings.')
-    p.add_argument('--test_sentences', type=str, default="../data/lst/lst_test.preprocessed",
+    p.add_argument('--test_sentences', type=str,
+                   default="../data/lst/lst_test.preprocessed",
                    help='Sentences for LST task.')
-    p.add_argument('--test_candidates', type=str, default="../data/lst/lst.gold.candidates",
+    p.add_argument('--test_candidates', type=str,
+                   default="../data/lst/lst.gold.candidates",
                    help='Candidates for LST task.')
-    p.add_argument('--window', type=int, default=5, help="Symmetric context window.")
-    p.add_argument('--model', action='store_true', help="Whether an entire model is given or just embeddings.")
-    p.add_argument('--multiply', action='store_true', help="If flagged, multiplies vectors instead of adding them.")
-    p.add_argument('--both', action='store_true', help="If flagged, uses the output layer of SGNS as embeddings.")
+    p.add_argument('--window', type=int, default=5,
+                   help="Symmetric context window.")
+    p.add_argument('--model', action='store_true',
+                   help="Whether an entire model is given or just embeddings.")
+    p.add_argument('--multiply', action='store_true',
+                   help="If flagged multiplies vectors instead of adding.")
+    p.add_argument('--both', action='store_true',
+                   help="If flagged uses the input and output embeddings.")
 
     args = p.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -116,7 +156,9 @@ if __name__ == "__main__":
         embeddings = pickle.load(open(args.embed_file, 'rb'))
 
     logging.info("Prepared data, starting testing now.")
-    pairs = prepare_test(embeddings, args.window, args.test_sentences, args.test_candidates)
+    pairs = prepare_test(
+        embeddings, args.window, args.test_sentences, args.test_candidates
+    )
     test(embeddings, pairs, args.multiply)
 
     

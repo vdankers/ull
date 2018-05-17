@@ -33,8 +33,8 @@ Test a model:
 ```
 python3 test.py --encoder MODEL.PT --decoder MODEL.PT --test_sentences LSTSENTENCES --test_candidates LSTCANDIDATES [--priors]
 ```
-If you add the flag Priors, the KL divergence between $\mu_w$ and $\sigma_w$ from the Encoder (inputting context and actual word) is compared to $\mu_s$ and $\sigma_s$ from the prior distribution (candidate).
-Else both the actual word and the candidate are given to the encoder and these $\mu$ and $\sigma$ are compared.
+If you add the flag Priors, the KL divergence between $$\mu_w$$ and $$\sigma_w$$ from the Encoder (inputting context and actual word) is compared to $$\mu_s$$ and $$\sigma_s$$ from the prior distribution (candidate).
+Else both the actual word and the candidate are given to the encoder and these $$\mu$$ and $$\sigma$$ are compared.
 
 
 ### Embed Align

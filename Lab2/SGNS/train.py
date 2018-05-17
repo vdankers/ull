@@ -18,25 +18,50 @@ from test import to_dict
 from sklearn.decomposition import PCA
 
 
-def train(batches, sgns, epochs, lr, batch_size, enable_cuda, test_pairs, embed_file, gold, words):
-    criterion = nn.NLLLoss()
+def train(batches, sgns, epochs, lr, batch_size, enable_cuda, test_pairs,
+          embed_file, gold, words):
+    """Train Skipgram Negative Sampling multiple iterations.
+
+    Args:
+        sgns: the model
+        epochs: number of iterations
+        lr: float, the learning rate
+        batch_size: integer indicating the batch size used
+        enable_cuda: boolean indicating whether GPU is present
+        test_pairs: tuples of test pairs for the LST task
+        embed_file: file to save the embeddings in
+        gold: golden standard for the LST task
+        words: the vocabulary words in order of appearance in the corpus
+
+    Returns:
+        trained sgns model
+        list of losses, one number per iteration
+    """
+
     losses = []
     optimizer = optim.Adam(sgns.parameters(), lr=lr) 
     for i in range(epochs):
-        embeddings, _ = to_dict(copy.deepcopy(sgns), words, embed_file)
-
-        test(embeddings, test_pairs, False, gold)
 
         all_loss = 0
         logging.info("Epoch {}".format(i+1))
+
+        # Train per batch
         for (neighbour, centre, neg_samples) in batches:
             optimizer.zero_grad()
             loss = sgns.forward(centre, neighbour, neg_samples)
             loss.backward()
             optimizer.step()
             all_loss += loss.data[0] 
+
+        # Validate your model, test pairs contains the validation data
+        embeddings, _ = to_dict(copy.deepcopy(sgns), words)
+        test(embeddings, test_pairs, False, gold)
+
+        # Output loss to user and save models
         losses.append(all_loss / len(batches) / batch_size)
-        logging.info("Average loss per training sample: {}".format(all_loss / len(batches) / batch_size))
+        logging.info("Average loss per training sample: {}".format(
+            all_loss / len(batches) / batch_size)
+        )
         pickle.dump(corpus.words, open("words.pickle", 'wb'))
         torch.save(sgns, "epoch_{}.pt".format(i))
 
@@ -51,7 +76,8 @@ if __name__ == "__main__":
     p.add_argument('--batch_size', type=int, default=10, help='batch size')
     p.add_argument('--enable_cuda', action='store_true', help='use CUDA')
     p.add_argument('--save', type=str, help='path for saving model')
-    p.add_argument('--embed_file', default='SGNS.pickle', type=str, help='file to save embeddings')
+    p.add_argument('--embed_file', default='SGNS.pickle', type=str, 
+                   help='file to save embeddings')
     p.add_argument('--epochs', type=int, default=10, help='#epochs')
     p.add_argument('--window', default=5, type=int)
     p.add_argument('--dim', default=300, type=int)
@@ -74,19 +100,22 @@ if __name__ == "__main__":
         logging.info("CUDA is disabled")
 
     # Prepare corpus + dictionaries, create training batches
-    corpus = Corpus(args.corpus, args.window, args.min_count, args.batch_size, args.nr_sents, args.neg_samples, enable_cuda)
+    corpus = Corpus(args.corpus, args.window, args.min_count, args.batch_size,
+                    args.nr_sents, args.neg_samples, enable_cuda)
     logging.info("Loaded data.")
 
     # Initialize model and cuda if necessary
     sgns = SGNS(corpus.vocab_size, args.dim, enable_cuda)
-    # torch.save(lm, "models/start_0.pt")
     if enable_cuda:
         sgns.cuda()
 
     # Train
     logging.info("Training will start shortly.")
-    pairs = prepare_test(corpus.dictionary.word2index, args.window, args.valid, args.candidates)
-    sgns, losses = train(corpus.batches, sgns, args.epochs, args.lr, args.batch_size, enable_cuda, pairs, args.embed_file, args.gold, corpus.words)
+    pairs = prepare_test(corpus.dictionary.word2index, args.window, 
+                         args.valid, args.candidates)
+    sgns, losses = train(corpus.batches, sgns, args.epochs, args.lr, 
+                         args.batch_size, enable_cuda, pairs, args.embed_file,
+                        args.gold, corpus.words)
 
     # Plot vectors using TSNE technique
     plt.figure(figsize=(40, 30))
@@ -96,7 +125,8 @@ if __name__ == "__main__":
     pca_result = pca.fit_transform(matrix)
     plt.scatter(pca_result[:, 0], pca_result[:, 1])
     for i, word in enumerate(corpus.words):
-        plt.annotate(word, xy=(pca_result[i, 0], pca_result[i, 1]), xytext=(0, 0), textcoords='offset points')
+        plt.annotate(word, xy=(pca_result[i, 0], pca_result[i, 1]), 
+                               xytext=(0, 0), textcoords='offset points')
     plt.savefig("tsne.png")
 
     plt.figure(figsize=(15, 10))

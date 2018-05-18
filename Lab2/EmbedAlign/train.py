@@ -18,32 +18,57 @@ from sklearn.decomposition import PCA
 from Encoder import Encoder
 from Decoder import Decoder
 
+
 def get_aer(corpus, decoder, encoder):
-    # aer
+    """Calculate the Alignment Error Rate.
+
+    Args:
+        w2i_e: dict mapping English words to indices
+        w2i_f: dict mapping French words to indices
+        decoder: Embed Align decoder
+        encoder: Embed Align encoder
+    """
     make_pred('./../data/wa/test.en', './../data/wa/test.fr',
               './alignment.pred', corpus.dictionary_e.word2index,
               corpus.dictionary_f.word2index, decoder, encoder)
     AER = aer.test('./../data/wa/test.naacl', './alignment.pred')   
     logging.info('alignment error rate: {}'.format(AER))
 
+
 def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
+    """Compute AER and LST scores.
+
+    Args:
+        corpus: Corpus object containing w2i and i2w dictionaires
+        pairs: list of tuples with testing data
+        encoder: Embed Align encoder model
+        decoder: Embed Align decoder model
+        i: what epoch you're in
+        enable_cuda: whether GPU is available
+    """
     w2i = corpus.dictionary_e.word2index
     i2w = corpus.dictionary_e.index2word
     outputs = []
     for orig_centre, (pre, post), n, term, candidates, candidates_rest in pairs:
+        # Prepare centre vector
         if orig_centre not in w2i: 
             centre = term.split('.')[0]
         else:
             centre = orig_centre
-        original_tensor = torch.autograd.Variable(torch.LongTensor([[w2i[w] for w in pre + [centre] + post if w in w2i]]))
+        original_tensor = torch.autograd.Variable(torch.LongTensor([
+            [w2i[w] for w in pre + [centre] + post if w in w2i]])
+        )
         if enable_cuda: original_tensor = original_tensor.cuda()
 
+        # Rank candidates one by one
         ranking = Counter()
         for candidate in candidates:
             if not centre in w2i:
                 ranking[candidate] = 0
             else:
-                candidate_tensor = torch.autograd.Variable(torch.LongTensor([[w2i[w] for w in pre + [candidate] + post if w in w2i]]))
+                candidate_tensor = torch.autograd.Variable(torch.LongTensor([
+                    [w2i[w] for w in pre + [candidate] + post if w in w2i]])
+                )
                 if enable_cuda: candidate_tensor = candidate_tensor.cuda()
                 mu_o, sigma_o = encoder.forward(original_tensor)
                 mu_c, sigma_c = encoder.forward(candidate_tensor)
@@ -62,8 +87,20 @@ def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
         f.write("\n".join(outputs))
     os.system("python ../data/lst/lst_gap.py ../data/lst/lst_valid.gold epoch_{}.out out no-mwe".format(i + 1))
 
+
 def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed",
                  cand_path="../data/lst/lst.gold.candidates"):
+    """Prepare the test set for evaluation for the LST task.
+
+    Args:
+        w2i: dictionary mapping words to indices
+        window: integer marking the context window
+        sentences_path: LST file with word, sentence pairs
+        cand_path: file containing LST substitution candidates
+
+    Returns:
+        a list of tuples
+    """
     test_pairs = []
     candidates = dict()
     missing_candidates = dict()
@@ -86,13 +123,34 @@ def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed"
             post = sentence[pos+1:min(pos + window + 1, len(sentence))]
             context = (pre, post)
             centre = sentence[pos]
-            test_pairs.append((centre, context, int(number), term, candidates[term], missing_candidates[term]))
+            test_pairs.append((centre, context, int(number), term,
+                               candidates[term], missing_candidates[term]))
     return test_pairs
 
 
-def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pairs, do_validation=True):
+def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda,
+          test_pairs, do_validation=True):
+    """Train Skipgram Negative Sampling multiple iterations.
+
+    Args:
+        corpus: Corpus instance containing training data and dictionaries
+        encoder: inference part of the Embed Align model
+        decoder: generative part of the Embed Align model
+        epochs: number of iterations
+        lr: float, the learning rate
+        batch_size: integer indicating the batch size used
+        enable_cuda: boolean indicating whether GPU is present
+        test_pairs: tuples of test pairs for the LST task
+        do_validation: flag indicating whether to perform validation
+
+    Returns:
+        list of losses, one number per iteration
+    """
+
     losses = []
-    optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=lr)
+    optimizer = optim.Adam(
+        list(encoder.parameters()) + list(decoder.parameters()), lr=lr
+    )
     n = len(corpus.batches)
     get_aer(corpus, decoder, encoder)
     for i in range(epochs):
@@ -115,13 +173,16 @@ def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pa
         get_aer(corpus, decoder, encoder)
         torch.save(encoder, "encoder_epoch_{}.pt".format(i))
         torch.save(decoder, "decoder_epoch_{}.pt".format(i))
-        pickle.dump(list(corpus.dictionary_e.word2index.items()), open("w2i_e.pickle", 'wb'))
-        pickle.dump(list(corpus.dictionary_f.word2index.items()), open("w2i_f.pickle", 'wb'))
+        pickle.dump(list(corpus.dictionary_e.word2index.items()),
+                         open("w2i_e.pickle", 'wb'))
+        pickle.dump(list(corpus.dictionary_f.word2index.items()),
+                         open("w2i_f.pickle", 'wb'))
 
         losses.append(all_loss / n / batch_size)
-        logging.info("Average loss per training sample: {}".format(all_loss / n / batch_size))
-        logging.info("KL {}, LL {}".format(all_KL / n / batch_size, all_ll / n / batch_size))
+        logging.info("Avg. loss per sample: {}".format(all_loss/n/batch_size))
+        logging.info("KL {}, LL {}".format(all_KL/n/batch_size, all_ll/n/batch_size))
     return losses
+
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(
@@ -142,7 +203,6 @@ if __name__ == "__main__":
     p.add_argument('--candidates', default='../data/lst/lst.gold.candidates')
     p.add_argument('--valid', default='../data/lst/lst_valid.preprocessed')
     p.add_argument('--gold', default='../data/lst/lst_valid.gold')
-
     
     args = p.parse_args()
     logging.basicConfig(level=logging.INFO)
@@ -156,26 +216,23 @@ if __name__ == "__main__":
         enable_cuda = False
         logging.info("CUDA is disabled")
 
-
     # Prepare corpus + dictionaries, create training batches
-    corpus = Corpus(args.english, args.french, args.batch_size, args.nr_sents, args.unique_words, args.enable_cuda)
-    test_pairs = prepare_test(corpus.dictionary_e.word2index, args.window, args.valid, args.candidates)
+    corpus = Corpus(args.english, args.french, args.batch_size, args.nr_sents,
+                    args.unique_words, args.enable_cuda)
+    test_pairs = prepare_test(corpus.dictionary_e.word2index, args.window,
+                              args.valid, args.candidates)
 
-    # logging.info("Loaded data.")
+    logging.info("Loaded data.")
 
     # Initialize model and cuda if necessary
     encoder = Encoder(corpus.vocab_size_e, args.dim, enable_cuda)
-    decoder = Decoder(corpus.vocab_size_e, corpus.vocab_size_f, args.dim, args.batch_size, enable_cuda)
+    decoder = Decoder(corpus.vocab_size_e, corpus.vocab_size_f, args.dim,
+                      args.batch_size, enable_cuda)
     if enable_cuda:
         encoder.cuda()
         decoder.cuda()
 
     # Train
     logging.info("Training will start shortly.")
-    losses = train(corpus, encoder, decoder, args.epochs, args.lr, args.batch_size, enable_cuda,test_pairs, True)
-
-    #plt.figure(figsize=(15, 10))
-    #plt.scatter([i for i in range(len(losses))], losses, alpha=0.3)
-    #plt.savefig("loss.png")
-    
-    
+    losses = train(corpus, encoder, decoder, args.epochs, args.lr,
+                   args.batch_size, enable_cuda,test_pairs, True)

@@ -9,7 +9,13 @@ class Encoder(nn.Module):
     """Encoder for Embed Align."""
 
     def __init__(self, vocab_size_e, dim, enable_cuda=False):
-        """Initialize parameters."""
+        """Initialize parameters.
+
+        Args:
+            vocab_size_e: size of English vocabulary
+            dim: desired dimensionality
+            enable_cuda: whether GPU is available
+        """
         super(Encoder, self).__init__()
         self.enable_cuda = enable_cuda
         self.dim = dim
@@ -19,13 +25,20 @@ class Encoder(nn.Module):
         self.affine_mu2 = nn.Linear(dim, dim, bias=True)
         self.affine_sigma1 = nn.Linear(dim*2, dim, bias=True)
         self.affine_sigma2 = nn.Linear(dim, dim, bias=True)
-        #self.lstm = nn.LSTM(input_size=dim, hidden_size=dim, num_layers=1, bias=True,
+
+        # Earlier on we used LSTM but it took too long to train
+        #self.lstm = nn.LSTM(input_size=dim, hidden_size=dim, num_layers=1, 
+        #                    bias=True,
         #                    batch_first=True, dropout=0, bidirectional=True)
 
     def forward(self, english, valid=False):
-        logging.basicConfig(level=logging.DEBUG)
+        """Forward pass through the network.
+
+        Args:
+            english: batch containing indices of English words per sentence
+            valid: whether in validation mode
+        """
         # Go from one hot to vectors
-        
         english = self.in_embeddings(english)
         mean = torch.mean(english, dim=1)
         mean = mean.unsqueeze(1).repeat(1, english.shape[1], 1)

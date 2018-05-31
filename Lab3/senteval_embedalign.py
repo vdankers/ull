@@ -152,16 +152,6 @@ def batcher(params, batch):
     # if a sentence is empty dot is set to be the only token
     # you can change it into NULL dependening in your model
 
-    emb = pickle.load(open("embeddings/bsg_prior.pickle", 'rb'))
-    alle_words = list(emb.keys())
-    alle = params.tks1[0].to_sequences([(' '.join(alle_words))])
-    alle = [np.array(alle[0][1:])]
-    vectors = params.extractor.get_z_embedding_batch(x_batch=alle)
-    ea = dict()
-    for i, word in enumerate(alle_words):
-        ea[word] = vectors[0, i, :]
-    pickle.dump(ea, open("embeddings/ea.pickle", 'wb'))
-    exit()
     batch = [sent if sent != [] else ['.'] for sent in batch]
     embeddings = []
     for sent in batch:

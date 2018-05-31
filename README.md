@@ -1,6 +1,42 @@
 # ull
 Repository containing assignments for the Unsupervised Language Learning course, University of Amsterdam.
 
+# Instructions for Lab 3:
+
+For this lab the SentEval library is needed: ```https://github.com/facebookresearch/SentEval```.
+We evaluate three models that learn word embeddings: Skip-Gram Negative Sampling, Bayesian Skip-Gram and Embed-Align.
+We combine these models with three methods for computing sentence representations: summing and normalising (AVG), weighted summing (SIF) and a recurrent encoder (GRAN).
+For our results, see the table pdf in the Lab3 folder.
+
+### SentEval
+
+We used two scripts to evaluate our models using SentEval:
+
+```senteval_custom.py```, using pickled embeddings that are used in SentEval. It can be run in three ways:
+1. ```python3 senteval_custom.py rnn embeddings.pickle encoder.pt w2i.pickle```
+2. ```python3 senteval_custom.py avg embeddings.pickle```
+3. ```python3 senteval_custom.py sif embeddings.pickle corpus.en FLOAT``` Where the float is a smoothing parameter for the smoothed inverse frequency weighting scheme.
+
+```senteval_embedalign.py```, that can simply be run by adding ```python3``` in front. This uses a pretrained Embed-Align model.
+
+### Learn Skip-Gram
+
+To train Skip-Gram Negative Sampling embeddings with Gensim, run ```python3 learn_sgns.py```.
+
+### Learn a Bayesian Skip-Gram model
+
+For this we refer to the instructions for the second lab below.
+
+### Learn a Gated Recurrent Averaging Network (GRAN)
+
+For this we refer to the folder SentEmbed, containing all code to train a GRAN encoder.
+To train the encoder, run the following command:
+
+```
+ python3 train.py --batch_size INT --epochs INT --enc_type gran --lr FLOAT --tf_ratio FLOAT --embed embeddings.pickle [--enable_cuda]
+```
+After training, an encoder and a dictionary mapping words to indices are saved. Use these for the ```senteval_custom.py``` script.
+
 # Instructions for Lab 2:
 
 For this lab we implemented three models: Skipgram Negative Sampling, Bayesian Skip-Gram and Embed-Align. In the _Lab2_ folder you will find separate folders for each of them. The models trained were too large to include, but we did include the embeddings in a pickled file. If you load them they can be evaluated with the testing script of Skipgram Negative Sampling. They are pickled dictionaries mapping words to arrays.

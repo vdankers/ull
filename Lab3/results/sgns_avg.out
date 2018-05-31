@@ -1,0 +1,143 @@
+2018-05-30 02:18:59,321 : ***** Transfer task : MR *****
+
+
+2018-05-30 02:18:59,727 : Generating sentence embeddings
+2018-05-30 02:19:01,209 : Generated sentence embeddings
+2018-05-30 02:19:01,210 : Training sklearn-LogReg with (inner) 10-fold cross-validation
+2018-05-30 02:19:11,617 : Best param found at split 1: l2reg = 8                 with score 68.9
+2018-05-30 02:19:22,558 : Best param found at split 2: l2reg = 8                 with score 69.23
+2018-05-30 02:19:33,435 : Best param found at split 3: l2reg = 8                 with score 68.79
+2018-05-30 02:19:44,115 : Best param found at split 4: l2reg = 2                 with score 68.92
+2018-05-30 02:19:54,993 : Best param found at split 5: l2reg = 2                 with score 69.03
+2018-05-30 02:20:05,780 : Best param found at split 6: l2reg = 2                 with score 69.14
+2018-05-30 02:20:17,126 : Best param found at split 7: l2reg = 4                 with score 68.8
+2018-05-30 02:20:27,828 : Best param found at split 8: l2reg = 2                 with score 68.68
+2018-05-30 02:20:39,043 : Best param found at split 9: l2reg = 1                 with score 68.9
+2018-05-30 02:20:50,238 : Best param found at split 10: l2reg = 8                 with score 68.76
+2018-05-30 02:20:50,559 : Dev acc : 68.91 Test acc : 68.93
+
+2018-05-30 02:20:50,560 : ***** Transfer task : CR *****
+
+
+2018-05-30 02:20:51,074 : Generating sentence embeddings
+2018-05-30 02:20:51,604 : Generated sentence embeddings
+2018-05-30 02:20:51,604 : Training sklearn-LogReg with (inner) 10-fold cross-validation
+2018-05-30 02:20:55,933 : Best param found at split 1: l2reg = 8                 with score 74.95
+2018-05-30 02:21:01,001 : Best param found at split 2: l2reg = 8                 with score 74.21
+2018-05-30 02:21:06,039 : Best param found at split 3: l2reg = 2                 with score 74.74
+2018-05-30 02:21:10,912 : Best param found at split 4: l2reg = 4                 with score 74.86
+2018-05-30 02:21:14,180 : Best param found at split 5: l2reg = 4                 with score 74.54
+2018-05-30 02:21:17,409 : Best param found at split 6: l2reg = 8                 with score 75.54
+2018-05-30 02:21:20,741 : Best param found at split 7: l2reg = 8                 with score 74.51
+2018-05-30 02:21:24,248 : Best param found at split 8: l2reg = 4                 with score 74.75
+2018-05-30 02:21:27,667 : Best param found at split 9: l2reg = 8                 with score 75.35
+2018-05-30 02:21:33,223 : Best param found at split 10: l2reg = 2                 with score 74.99
+2018-05-30 02:21:33,357 : Dev acc : 74.84 Test acc : 75.12
+
+2018-05-30 02:21:33,358 : ***** Transfer task : MPQA *****
+
+
+2018-05-30 02:21:33,876 : Generating sentence embeddings
+2018-05-30 02:21:34,201 : Generated sentence embeddings
+2018-05-30 02:21:34,202 : Training sklearn-LogReg with (inner) 10-fold cross-validation
+2018-05-30 02:21:45,395 : Best param found at split 1: l2reg = 0.25                 with score 86.0
+2018-05-30 02:21:56,856 : Best param found at split 2: l2reg = 0.25                 with score 86.19
+2018-05-30 02:22:08,685 : Best param found at split 3: l2reg = 8                 with score 86.09
+2018-05-30 02:22:18,905 : Best param found at split 4: l2reg = 0.25                 with score 86.44
+2018-05-30 02:22:29,476 : Best param found at split 5: l2reg = 0.5                 with score 86.06
+2018-05-30 02:22:40,296 : Best param found at split 6: l2reg = 0.5                 with score 86.15
+2018-05-30 02:22:51,364 : Best param found at split 7: l2reg = 4                 with score 86.0
+2018-05-30 02:23:02,890 : Best param found at split 8: l2reg = 0.25                 with score 86.19
+2018-05-30 02:23:14,375 : Best param found at split 9: l2reg = 0.25                 with score 86.14
+2018-05-30 02:23:25,913 : Best param found at split 10: l2reg = 0.25                 with score 86.16
+2018-05-30 02:23:26,159 : Dev acc : 86.14 Test acc : 86.07
+
+2018-05-30 02:23:26,160 : ***** Transfer task : SUBJ *****
+
+
+2018-05-30 02:23:26,644 : Generating sentence embeddings
+2018-05-30 02:23:28,311 : Generated sentence embeddings
+2018-05-30 02:23:28,312 : Training sklearn-LogReg with (inner) 10-fold cross-validation
+2018-05-30 02:23:39,487 : Best param found at split 1: l2reg = 4                 with score 85.46
+2018-05-30 02:23:51,094 : Best param found at split 2: l2reg = 2                 with score 85.74
+2018-05-30 02:24:01,162 : Best param found at split 3: l2reg = 8                 with score 85.97
+2018-05-30 02:24:12,065 : Best param found at split 4: l2reg = 2                 with score 85.66
+2018-05-30 02:24:22,726 : Best param found at split 5: l2reg = 4                 with score 85.59
+2018-05-30 02:24:32,835 : Best param found at split 6: l2reg = 4                 with score 85.7
+2018-05-30 02:24:43,530 : Best param found at split 7: l2reg = 1                 with score 85.66
+2018-05-30 02:24:54,669 : Best param found at split 8: l2reg = 2                 with score 85.67
+2018-05-30 02:25:05,691 : Best param found at split 9: l2reg = 1                 with score 85.6
+2018-05-30 02:25:17,156 : Best param found at split 10: l2reg = 2                 with score 85.54
+2018-05-30 02:25:17,345 : Dev acc : 85.66 Test acc : 85.43
+
+2018-05-30 02:25:17,346 : ***** Transfer task : SST Binary classification *****
+
+
+2018-05-30 02:25:18,069 : Computing embedding for test
+2018-05-30 02:25:18,323 : Computed test embeddings
+2018-05-30 02:25:18,323 : Computing embedding for dev
+2018-05-30 02:25:18,448 : Computed dev embeddings
+2018-05-30 02:25:18,448 : Computing embedding for train
+2018-05-30 02:25:24,709 : Computed train embeddings
+2018-05-30 02:25:24,709 : Training sklearn-LogReg with standard validation..
+2018-05-30 02:25:34,786 : [('reg:0.25', 72.13), ('reg:0.5', 72.25), ('reg:1', 72.36), ('reg:2', 72.36), ('reg:4', 72.36), ('reg:8', 72.48)]
+2018-05-30 02:25:34,787 : Validation : best param found is reg = 8 with score             72.48
+2018-05-30 02:25:34,787 : Evaluating...
+2018-05-30 02:25:36,571 : 
+Dev acc : 72.48 Test acc : 71.06 for             SST Binary classification
+
+2018-05-30 02:25:36,621 : ***** Transfer task : TREC *****
+
+
+2018-05-30 02:25:37,758 : Computed train embeddings
+2018-05-30 02:25:37,802 : Computed test embeddings
+2018-05-30 02:25:37,802 : Training sklearn-LogReg with 10-fold cross-validation
+2018-05-30 02:26:13,817 : [('reg:0.5', 61.41), ('reg:1', 62.14), ('reg:2', 62.6), ('reg:4', 62.8), ('reg:8', 62.73), ('reg:16', 62.75), ('reg:32', 62.88)]
+2018-05-30 02:26:13,817 : Cross-validation : best param found is reg = 32             with score 62.88
+2018-05-30 02:26:13,817 : Evaluating...
+2018-05-30 02:26:14,570 : 
+Dev acc : 62.88 Test acc : 68.8             for TREC
+
+2018-05-30 02:26:14,571 : ***** Transfer task : MRPC *****
+
+
+2018-05-30 02:26:15,135 : Computing embedding for test
+2018-05-30 02:26:15,769 : Computed test embeddings
+2018-05-30 02:26:15,769 : Computing embedding for train
+2018-05-30 02:26:17,267 : Computed train embeddings
+2018-05-30 02:26:17,269 : Training sklearn-LogReg with 10-fold cross-validation
+2018-05-30 02:26:28,876 : [('reg:0.5', 70.61), ('reg:1', 70.46), ('reg:2', 70.73), ('reg:4', 71.05), ('reg:8', 71.2), ('reg:16', 71.03), ('reg:32', 71.03)]
+2018-05-30 02:26:28,876 : Cross-validation : best param found is reg = 8             with score 71.2
+2018-05-30 02:26:28,876 : Evaluating...
+2018-05-30 02:26:29,054 : Dev acc : 71.2 Test acc 69.91; Test F1 79.54 for MRPC.
+
+2018-05-30 02:26:29,055 : ***** Transfer task : SICK-Entailment*****
+
+
+2018-05-30 02:26:29,599 : Computing embedding for test
+2018-05-30 02:26:30,278 : Computed test embeddings
+2018-05-30 02:26:30,278 : Computing embedding for dev
+2018-05-30 02:26:30,349 : Computed dev embeddings
+2018-05-30 02:26:30,350 : Computing embedding for train
+2018-05-30 02:26:30,964 : Computed train embeddings
+2018-05-30 02:26:30,968 : Training sklearn-LogReg with standard validation..
+2018-05-30 02:26:32,826 : [('reg:0.25', 69.6), ('reg:0.5', 72.2), ('reg:1', 72.2), ('reg:2', 73.0), ('reg:4', 72.6), ('reg:8', 73.4)]
+2018-05-30 02:26:32,826 : Validation : best param found is reg = 8 with score             73.4
+2018-05-30 02:26:32,826 : Evaluating...
+2018-05-30 02:26:33,265 : 
+Dev acc : 73.4 Test acc : 75.62 for                        SICK entailment
+
+2018-05-30 02:26:33,265 : ***** Transfer task : STS14 *****
+
+
+2018-05-30 02:26:33,849 : deft-forum : pearson = 0.3155, spearman = 0.3696
+2018-05-30 02:26:33,946 : deft-news : pearson = 0.6354, spearman = 0.6337
+2018-05-30 02:26:34,121 : headlines : pearson = 0.5456, spearman = 0.5206
+2018-05-30 02:26:34,321 : images : pearson = 0.5222, spearman = 0.5383
+2018-05-30 02:26:34,518 : OnWN : pearson = 0.5461, spearman = 0.6171
+2018-05-30 02:26:34,745 : tweet-news : pearson = 0.5113, spearman = 0.5115
+2018-05-30 02:26:34,745 : ALL (weighted average) : Pearson = 0.5137,             Spearman = 0.5326
+2018-05-30 02:26:34,746 : ALL (average) : Pearson = 0.5127,             Spearman = 0.5318
+
+2018-05-30 02:26:34,746 : {'SST2': {'acc': 71.06, 'ndev': 872, 'ntest': 1821, 'devacc': 72.48}, 'STS14': {'images': {'nsamples': 750, 'spearman': SpearmanrResult(correlation=0.5383211521471615, pvalue=1.416213900538833e-57), 'pearson': (0.5221901318363227, 1.0721777505732394e-53)}, 'deft-news': {'nsamples': 300, 'spearman': SpearmanrResult(correlation=0.6337038295413105, pvalue=4.308241857730073e-35), 'pearson': (0.6353895890642558, 2.520047092175791e-35)}, 'deft-forum': {'nsamples': 450, 'spearman': SpearmanrResult(correlation=0.3696318131263046, pvalue=5.137712277473221e-16), 'pearson': (0.31550334717639933, 7.387530854699393e-12)}, 'headlines': {'nsamples': 750, 'spearman': SpearmanrResult(correlation=0.5205799633993788, pvalue=2.5475858503599444e-53), 'pearson': (0.5456227773891464, 2.1139720648079166e-59)}, 'all': {'spearman': {'mean': 0.5318161435419139, 'wmean': 0.532564367655235}, 'pearson': {'mean': 0.5126804435443238, 'wmean': 0.5137295137913659}}, 'OnWN': {'nsamples': 750, 'spearman': SpearmanrResult(correlation=0.6171264331952184, pvalue=6.4046338636083525e-80), 'pearson': (0.5460945084056731, 1.605371941962998e-59)}, 'tweet-news': {'nsamples': 750, 'spearman': SpearmanrResult(correlation=0.5115336698421088, pvalue=3.0253154831387674e-51), 'pearson': (0.5112823073941454, 3.4477129558777763e-51)}}, 'SUBJ': {'acc': 85.43, 'ndev': 10000, 'ntest': 10000, 'devacc': 85.66}, 'MR': {'acc': 68.93, 'ndev': 10662, 'ntest': 10662, 'devacc': 68.91}, 'SICKEntailment': {'acc': 75.62, 'ndev': 500, 'ntest': 4927, 'devacc': 73.4}, 'TREC': {'acc': 68.8, 'ndev': 5452, 'ntest': 500, 'devacc': 62.88}, 'MRPC': {'acc': 69.91, 'ndev': 4076, 'f1': 79.54, 'ntest': 1725, 'devacc': 71.2}, 'CR': {'acc': 75.12, 'ndev': 3775, 'ntest': 3775, 'devacc': 74.84}, 'MPQA': {'acc': 86.07, 'ndev': 10606, 'ntest': 10606, 'devacc': 86.14}}
+imports complete

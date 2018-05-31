@@ -50,6 +50,42 @@ class Dictionary(object):
         for word in text:
             self.add_word(word)
 
+    def prepare_negative_sampling_table(self):
+        """Create a table from which one can randomly draw negative samples.
+        Every word is represented according to an adapted frequency count."""
+        table = []
+        self.words = [self.index2word[i] for i in range(len(self.index2word))]
+        adapted_counts = np.array(
+            list([float(self.counts[w]) ** (3/4) for w in self.words])
+        )
+        # print(adapted_counts)
+        normalizer = sum(adapted_counts)
+        for i, number in enumerate(adapted_counts):
+            p = number / normalizer
+            p = p * 1000000
+            for j in range(int(p)):
+                table.append(i)
+        logging.info("Prepared negative samples.")
+        self.table = table
+
+    def sample(self, pos_index, amount):
+        """ Draw the desired amount of negative samples that are not the given index.
+
+        Args:
+            pos_index (int): index of the positive word, do not return this as negative sample
+            amount (int): number of negative samples to return 
+
+        Returns:
+            list of negative samples
+        """
+        samples = []
+        for i in range(amount):
+            neg_index = pos_index[0]
+            while neg_index in pos_index:
+                neg_index = self.table[random.randint(0, len(self.table)-1)]
+            samples.append(neg_index)
+        return samples
+
     def to_unk(self):
         """From now on your dictionaries default to UNK for unknown words."""
         unk = self.add_word("UNK")
@@ -86,18 +122,21 @@ class Corpus(object):
                 if len(self.lines) == nr_docs and nr_docs != -1:
                     break
 
-        #most_common = set([x[0] for x in self.dictionary.counts.most_common(10000)])
+        most_common = set([x[0] for x in self.dictionary.counts.most_common(280000)])
 
         # Redo, but remove words that occur less than five times
         dictionary_norare = Dictionary()
         for i, line in enumerate(self.lines):
-            # new_line = self.remove_uncommon_from_list(most_common, line)
-            dictionary_norare.add_text(line)
+            new_line = self.remove_uncommon_from_list(most_common, line)
+            dictionary_norare.add_text(new_line)
             self.lines[i] = line
         if nr_docs != -1: self.lines = self.lines[:nr_docs]
         self.dictionary = dictionary_norare
         self.dictionary.to_unk()
         self.vocab_size = len(self.dictionary.word2index)
+
+        # Ask dictionary to prepare negative samples before creating batches
+        self.dictionary.prepare_negative_sampling_table()
 
         # Create batches
         self.pairs = self.collection_to_pairs()
@@ -127,8 +166,11 @@ class Corpus(object):
                 post = indices[j+1:min(j + self.window + 1, len(indices))]
                 pre = (self.window - len(pre)) * [self.dictionary.word2index["<s>"]] + pre
                 post = post + (self.window - len(post)) * [self.dictionary.word2index["</s>"]]
+                context = pre + post
+                negative = self.dictionary.sample([centre] + context, self.window * 2)
+
                 # Add every centre and context as a pair
-                pairs.append((centre, pre + post))
+                pairs.append((centre, context, negative))
 
         logging.info("Initialized numerical training pairs.")
         return pairs
@@ -144,17 +186,24 @@ class Corpus(object):
         batches = []
         batch_centre = torch.LongTensor(self.batch_size)
         batch_context = torch.LongTensor(self.batch_size, self.window * 2)
+        batch_negative = torch.LongTensor(self.batch_size, self.window * 2)
         
         # Go through data in steps of batch size
         for i in range(0, len(self.pairs) - self.batch_size, self.batch_size):
             batch_pairs = self.pairs[i:i+self.batch_size]
-            for j, (centre, context) in enumerate(batch_pairs):
+            for j, (centre, context, negative) in enumerate(batch_pairs):
                 batch_centre[j] = centre
                 batch_context[j, :] = torch.LongTensor(context)
+                batch_negative[j, :] = torch.LongTensor(negative)
+            
+            a = Variable(batch_centre)
+            b = Variable(batch_context)
+            c = Variable(batch_negative)
+
             if enable_cuda:
-                batches.append((Variable(batch_centre).cuda(), Variable(batch_context).cuda()))
+                batches.append((a.cuda(), b.cuda(), c.cuda()))
             else:
-                batches.append((Variable(batch_centre), Variable(batch_context)))
+                batches.append((a, b, c))
         return batches
 
     def prepare_test(self, sentences_path="../data/lst/lst_valid.preprocessed",

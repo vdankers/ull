@@ -42,7 +42,7 @@ def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
                 mu_w, sigma_w = encoder.forward(centre, context, True)
                 mu_s, sigma_s = encoder.forward(candidate_tensor, context, True)
                 KL = decoder.KL(mu_w, sigma_w, mu_s, sigma_s)
-                ranking[candidate] = - 1 * KL.data[0]
+                ranking[candidate] = - 1 * KL.item()
 
         # Use format specified in LST README
         output = "RANKED\t{} {}".format(term, n)
@@ -55,7 +55,7 @@ def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
     with open("epoch_{}.out".format(i + 1), 'w') as f:
         f.write("\n".join(outputs))
     print(i)
-    os.system("python ../data/lst/lst_gap.py ../data/lst/lst_valid.gold epoch_{}.out out no-mwe".format(i + 1))
+    os.system("python ../data/lst/lst_gap.py ../data/lst/lst_test.gold epoch_{}.out out no-mwe".format(i + 1))
 
 
 def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pairs):
@@ -69,16 +69,16 @@ def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pa
         all_ll = 0
         all_KL = 0
         logging.info("Epoch {}".format(i+1))
-        for (centre, context) in corpus.batches:
+        for (centre, context, negative) in tqdm(corpus.batches):
             optimizer.zero_grad()
             mu, sigma = encoder.forward(centre, context)
-            ll, KL = decoder.forward(mu, sigma, centre, context)
+            ll, KL = decoder.forward(mu, sigma, centre, context, centre.shape[0], negative)
             loss = -1 * (ll - KL)
-            all_ll += ll.data[0]
-            all_KL += KL.data[0]
+            all_ll += ll.item()
+            all_KL += KL.item()
             loss.backward()
             optimizer.step()
-            all_loss += loss.data[0]
+            all_loss += loss.item()
 
         pickle.dump(list(corpus.dictionary.word2index.items()), open("w2i.pickle".format(i), 'wb'))
         torch.save(encoder, "encoder_epoch_{}.pt".format(i))
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     # Prepare corpus + dictionaries, create training batches
     corpus = Corpus(args.corpus, args.window, args.batch_size, args.nr_sents, args.neg_samples, enable_cuda)
-    test_pairs = prepare_test(corpus.dictionary.word2index, args.window, args.valid, args.candidates)
+    test_pairs = prepare_test(corpus.dictionary.word2index, args.window)
     logging.info("Loaded data.")
 
     # Initialize model and cuda if necessary

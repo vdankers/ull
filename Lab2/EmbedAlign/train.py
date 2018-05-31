@@ -130,7 +130,7 @@ def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed"
 
 def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda,
           test_pairs, do_validation=True):
-    """Train Skipgram Negative Sampling multiple iterations.
+    """Train Embed-Align multiple iterations.
 
     Args:
         corpus: Corpus instance containing training data and dictionaries
@@ -185,8 +185,7 @@ def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda,
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(
-        description='Skipgram Negative Sampling.')
+    p = argparse.ArgumentParser(description='Embed-Align.')
     p.add_argument('--english', type=str, default='../data/hansards/training.en',
                    help='path to Fnglish data.')
     p.add_argument('--french', type=str, default='../data/hansards/training.fr',

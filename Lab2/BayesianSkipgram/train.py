@@ -18,6 +18,16 @@ from Decoder import Decoder
 
 
 def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
+    """Compute AER and LST scores.
+
+    Args:
+        corpus: Corpus object containing w2i and i2w dictionaires
+        pairs: list of tuples with testing data
+        encoder: Bayesian Skip-Gram encoder model
+        decoder: Bayesian Skip-Gram decoder model
+        i: what epoch you're in
+        enable_cuda: whether GPU is available
+    """
     w2i = corpus.dictionary.word2index
     i2w = corpus.dictionary.index2word
     outputs = []
@@ -32,6 +42,7 @@ def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
             centre = centre.cuda()
             context = context.cuda()
 
+        # Rank candidates one by one
         ranking = Counter()
         for candidate in candidates:
             if not orig_centre in w2i and not term.split('.')[0] in w2i:
@@ -59,6 +70,22 @@ def validate(corpus, pairs, encoder, decoder, i, enable_cuda):
 
 
 def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pairs):
+    """Train Bayesian Skip-Gram multiple iterations.
+
+    Args:
+        corpus: Corpus instance containing training data and dictionaries
+        encoder: inference part of the Embed Align model
+        decoder: generative part of the Embed Align model
+        epochs: number of iterations
+        lr: float, the learning rate
+        batch_size: integer indicating the batch size used
+        enable_cuda: boolean indicating whether GPU is present
+        test_pairs: tuples of test pairs for the LST task
+        do_validation: flag indicating whether to perform validation
+
+    Returns:
+        list of losses, one number per iteration
+    """
     criterion = nn.NLLLoss()
     losses = []
     optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=lr)
@@ -92,6 +119,17 @@ def train(corpus, encoder, decoder, epochs, lr, batch_size, enable_cuda, test_pa
 
 def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed",
                  cand_path="../data/lst/lst.gold.candidates"):
+    """Prepare the test set for evaluation for the LST task.
+
+    Args:
+        w2i: dictionary mapping words to indices
+        window: integer marking the context window
+        sentences_path: LST file with word, sentence pairs
+        cand_path: file containing LST substitution candidates
+
+    Returns:
+        a list of tuples
+    """
     test_pairs = []
     candidates = dict()
     missing_candidates = dict()
@@ -119,8 +157,7 @@ def prepare_test(w2i, window, sentences_path="../data/lst/lst_test.preprocessed"
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(
-        description='Skipgram Negative Sampling.')
+    p = argparse.ArgumentParser(description='Bayesian Skip-Gram')
     p.add_argument('--corpus', type=str, default='data/train.txt',
                    help='path to word-association pairs for training.')
     p.add_argument('--lr', type=float, default=0.01, help='learning rate')

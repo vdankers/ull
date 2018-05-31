@@ -1,12 +1,3 @@
-"""Prepare a corpus for definition modelling.
-
-Tasks performed:
-    - Generate a vocab dictionary that maps words to indices and vice versa.
-    - Preprocess text by adding start and end tags.
-    - Read text files and save pairs word - association.
-    - Convert pairs to numbers in preparation of training a language model.
-"""
-
 import nltk
 import sys
 import logging
@@ -96,14 +87,15 @@ class Corpus(object):
     """Collects words and corresponding associations, preprocesses them."""
 
     def __init__(self, path, window, batch_size, nr_docs, neg_samples, enable_cuda=False):
-        """Initialize pairs of words and associations.
+        """Initialise a corpus with word and context pairs, create dictionaries
+        and bathes.
 
         Args:
             path (str): file path to read data from
             window (int): window size for corpus pairs
             batch_size (int): int indicating the desired size for batches
             nr_docs (int): how many sentences should be used from the corpus
-            neg_samples (int): number of negative samples selected per positive sample
+            neg_samples (int): #negative samples selected per positive sample
             enable_cuda (bool): whether to cuda the batches
         """
         self.window = window

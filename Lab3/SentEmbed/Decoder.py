@@ -32,6 +32,7 @@ class Decoder(nn.Module):
         Args:
             token (Variable LongTensor): token index
             hidden (Variable FloatTensor): hidden state from encoder
+            c (Variable FloatTensor): memory state of LSTM
             validation (bool): whether we are evaluating (do not apply dropout)
 
         Returns:
@@ -61,6 +62,7 @@ class Decoder(nn.Module):
             token (Variable LongTensor): token indices batchwise
             english (Variable FloatTensor): encoding of english sentence
             hidden (Variable FloatTensor): hidden state from encoder
+            c (Variable FloatTensor): memory state of LSTM
 
         Returns:
             vocab_probs: distribution over vocabulary

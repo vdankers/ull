@@ -19,8 +19,6 @@ class Encoder(nn.Module):
         self.type = type
         self.enable_cuda = enable_cuda
 
-        # Encoder is gru or avg
-        # if self.type.lower() == 'gru':
         self.network = nn.LSTM(hidden_size, hidden_size, batch_first=True,
                                bidirectional=True)
 

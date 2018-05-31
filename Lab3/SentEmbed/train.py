@@ -5,7 +5,6 @@ import torch
 import random
 import os
 import torch.nn as nn
-from matplotlib import pyplot as plt
 
 from tqdm import tqdm
 from torch import optim
@@ -13,12 +12,6 @@ from collections import defaultdict, Counter
 from random import shuffle, random
 from data import Corpus
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-
-import plotly.plotly as py 
-import plotly.graph_objs as go
-import plotly.offline as offline
-import plotly
-plotly.tools.set_credentials_file(username='vdankers', api_key='iqYAxJNr16lmrFjgys4l')
 
 from Encoder import Encoder
 from Decoder import Decoder
@@ -172,6 +165,7 @@ if __name__ == "__main__":
     corpus = Corpus(args.english, args.batch_size, args.min_count, args.lower,
                     args.enable_cuda, embed_dict)
 
+    # Load the pretrained embeddings
     dim = len(embed_dict["and"])
     embeddings = torch.Tensor(len(embed_dict), dim)
     for word in embed_dict:
@@ -180,8 +174,7 @@ if __name__ == "__main__":
         except:
             print(word)
 
-    print(len(list(embed_dict.keys())), len(corpus.dict.word2index))
-
+    # Initialise encoder and decoder
     encoder = Encoder(embeddings, dim, corpus.vocab_size, corpus.max_pos, args.enc_type, enable_cuda)
     eos = corpus.dict.word2index["</s>"]
     decoder = Decoder(embeddings, dim, corpus.vocab_size, eos, corpus.longest_english)
